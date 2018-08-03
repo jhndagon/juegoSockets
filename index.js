@@ -31,6 +31,6 @@ io.on('connection', function(socket){
      });
 });
 
-server.listen(3000, function(){
+server.listen(process.env.PORT || 8080, function(){
     console.log('Escuchando en localhost:3000')
 })
