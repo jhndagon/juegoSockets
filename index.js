@@ -2,35 +2,47 @@ var express = require('express')
 var app = express()
 var server = require('http').Server(app)
 var io = require('socket.io')(server)
+
 var roomno = 1;
 app.use(express.static('public'))
 
-app.get('/', function(req, res) {
-    res.status(200).send("hola");
-});
+var usuario = {
+    room: null,
+    nombre: null,
+    puntaje: null
+}
+
+var usuarios = []
 
 io.on('connection', function(socket){
     console.log('usuario conectado');
 
-    socket.emit('mover', {
-        usuario: 'algo'
-    })
+   /*socket.on('datos',(datos) => {
+       console.log(datos)
+   })*/
     
     //Increase roomno 2 clients are present in a room.
    if(io.nsps['/'].adapter.rooms["room-"+roomno] 
         && io.nsps['/'].adapter.rooms["room-"+roomno].length > 1){ 
+            usuario.room = roomno;
             roomno++;
+            console.log(usuario.room)
         }
    socket.join("room-"+roomno);
+    
+    if(io.nsps['/'].adapter.rooms["room-"+roomno].length == 2){
+        io.sockets.in("room-"+roomno).emit('connectToRoom', {usuario});
+    }
+
 
    //Send this event to everyone in the room.
-   io.sockets.in("room-"+roomno).emit('connectToRoom', "You are in room no. "+roomno);
+   
 
    socket.on('disconnect', function () {    
         console.log('A user disconnected');
      });
 });
 
-server.listen(process.env.PORT || 8080, function(){
+server.listen(process.env.PORT || 3000, function(){
     console.log('Escuchando en localhost:3000')
 })

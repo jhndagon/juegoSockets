@@ -1,7 +1,9 @@
 var socket = io()
+
 socket.on('connectToRoom',function(data) {
     document.body.innerHTML = '';
-    document.write(data);
+    document.write(usuario);
+    
  });
 
 
@@ -13,3 +15,4 @@ socket.on('connect', function(data){
 socket.on('mover', function(data){
     console.log(data)
 })
+
