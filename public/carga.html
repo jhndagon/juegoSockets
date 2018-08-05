@@ -9,15 +9,38 @@
     </script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="./socket.js"></script>
-    <script src="./usuario.js"></script>
+    <style>
+    h1 {
+    text-align: center;
+}
+#cuadrado{
+    margin:200px;
+    border: solid 1px blue;
+    background:yellow;
+    width:100px;
+    height:100px;
+    position: absolute;
+}
+#cuadrado2{
+    margin:200px;
+    border: solid 1px blue;
+    background:red;
+    width:100px;
+    height:100px;
+    position: absolute;
+}
+    </style>
 </head>
+
 <body>
-    <div align= "center">
+    <div id="datos" align= "center">
         <br>
         <br>
         <br>
         <h1 align="center">Esperando jugador.</h1> 
         <img align= "center" src="4F2.gif" alt="Funny image" width="200" height="200">
     </div>
+    <div id="cuadrado"></div>
+    <div id="cuadrado2"></div>
 </body>
 </html>
