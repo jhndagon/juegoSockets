@@ -7,6 +7,8 @@ var usuario = {
     room: null
 }
 
+
+
 socket.emit('datos', { usuario })
 
 socket.on('connectToRoom', function (data) {
@@ -18,6 +20,7 @@ socket.on('connectToRoom', function (data) {
 
     document.onkeydown = desplazar;
 
+    document.getElementById('canvas').style.display = 'block';
 
     document.addEventListener('keydown', (e) => {
         var tecla = e.keyCode

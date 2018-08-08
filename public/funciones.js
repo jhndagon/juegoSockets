@@ -5,4 +5,5 @@ function login() {
     console.log(usuario)
     location.href ="carga.html?usuario="+usuario;
     
+    
 }
