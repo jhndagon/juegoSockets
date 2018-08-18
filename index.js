@@ -13,7 +13,7 @@ io.on('connection', function (socket) {
     console.log('usuario conectado');
 
     socket.on('datos', (datos) => {
-        usuario = datos['usuario']
+        usuario = datos
         usuario.room = roomno
         usuarios.push(usuario)
         //comprueba que dos jugadores esten conectados
@@ -22,6 +22,7 @@ io.on('connection', function (socket) {
             usuariosPorRoom.push(usuariosPorRoom)
             usuarios = []
         }
+        
     })
 
     socket.on('disconnect', function () {
@@ -37,7 +38,9 @@ io.on('connection', function (socket) {
     }
     socket.join("room-" + roomno);
 
-
+    setTimeout(() => {
+            
+    }, 390);
 
 });
 
