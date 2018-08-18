@@ -6,48 +6,41 @@ var io = require('socket.io')(server)
 var roomno = 1;
 app.use(express.static('public'))
 
-var usuario = {
-    id: null,    
-    nombre: null,
-    room: null
-}
-
 var usuarios = []
+var usuariosPorRoom = []
 
-io.on('connection', function(socket){
+io.on('connection', function (socket) {
     console.log('usuario conectado');
 
-   socket.on('datos',(datos) => {
-       usuario = datos['usuario']
-   })
-    
-    //Increase roomno 2 clients are present in a room.
-   if(io.nsps['/'].adapter.rooms["room-"+roomno] 
-        && io.nsps['/'].adapter.rooms["room-"+roomno].length > 1){            
-            ++roomno;                         
-    }
-   socket.join("room-"+roomno);
-    
-    if(io.nsps['/'].adapter.rooms["room-"+roomno].length == 2){        
-        usuario.room = roomno;
-        io.sockets.in("room-"+roomno).emit('connectToRoom', {usuario});
-    }
-
-    socket.on('informacion', (data) => {
-        io.sockets.in("room-"+data['usuario'].room).emit('recibir', data)
+    socket.on('datos', (datos) => {
+        usuario = datos['usuario']
+        usuario.room = roomno
+        usuarios.push(usuario)
+        //comprueba que dos jugadores esten conectados
+        if (io.nsps['/'].adapter.rooms["room-" + roomno].length == 2) {
+            io.sockets.in("room-" + roomno).emit('connectToRoom', usuariosPorRoom[roomno - 1]);
+            usuariosPorRoom.push(usuariosPorRoom)
+            usuarios = []
+        }
     })
 
-    socket.on('posicion', (datos) => {
-        console.log(datos);
-        io.sockets.in("room-"+datos['usuario'].room).emit('dibujar',datos['posicion'])
-    })
-   
-
-   socket.on('disconnect', function () {    
+    socket.on('disconnect', function () {
         console.log('A user disconnected');
-     });
+    });
+
+
+
+    //Incrementa roomno si hay 2 clientes.
+    if (io.nsps['/'].adapter.rooms["room-" + roomno]
+        && io.nsps['/'].adapter.rooms["room-" + roomno].length > 1) {
+        ++roomno;
+    }
+    socket.join("room-" + roomno);
+
+
+
 });
 
-server.listen(process.env.PORT || 3000, function(){
+server.listen(process.env.PORT || 3000, function () {
     console.log('Escuchando en localhost:3000')
 })

@@ -1,98 +1,27 @@
-var socket = io()
-
+var socket = io.connect("http://localhost:3000")
 var nick = window.location.href.split("?usuario=")[1]
-var usuario = {
-    id: null,
-    nombre: nick,
-    room: null
+var usuario;
+
+function setup(){
+    usuario = new Player(socket.id, nick, null);
+    var cnv =  createCanvas(400,500)
+    cnv.parent("canvas")
+    cnv.id("micanvas")   
+    socket.emit('datos', {usuario})
+}
+
+function update(){
+    usuario.show()
 }
 
 
 
-socket.emit('datos', { usuario })
 
 socket.on('connectToRoom', function (data) {
-    usuario.id = socket.id;
-    usuario.room = data['usuario'].room
-    document.getElementById("datos").innerHTML = usuario.nombre;
-    //document.write(usuario.nombre);
-    //document.style(stilo);
-
-    document.onkeydown = desplazar;
-
+    //usuario.id = socket.id;
+    //usuario.room = data['usuario'].room
+    document.getElementById("datos").innerHTML = nick;
     document.getElementById('canvas').style.display = 'block';
-
-    document.addEventListener('keydown', (e) => {
-        var tecla = e.keyCode
-        socket.emit('informacion', { usuario, tecla })
-    },false);   
+   
 
 });
-
-socket.on('recibir', (datos) => {
-    console.log(`room: ${datos['usuario'].room}`)
-})
-
-
-socket.on('connect', function (data) {
-    console.log('conectado')
-})
-
-var posicion = {
-    situacionX: 0,
-    situacionY: 0
-};
-function desplazar(objeto) {
-    var tecla = objeto.which;
-
-    var situacionY = document.getElementById("cuadrado").offsetLeft;
-    var situacionX = document.getElementById("cuadrado").offsetTop;
-    switch (tecla) {
-        case 37:
-            cuadrado.style.left = situacionY - 220 + "px"; 
-            posicion.situacionX = situacionY - 220;
-            break;
-        case 38:
-            cuadrado.style.top = situacionX - 220 + "px"; 
-            posicion.situacionX = situacionX - 220;
-            break;
-        case 39:
-            cuadrado.style.left = situacionY - 180 + "px"; 
-            posicion.situacionX = situacionY - 180;
-            break;
-        case 40:
-            cuadrado.style.top = situacionX - 180 + "px"; 
-            posicion.situacionX = situacionX - 180;
-            break;
-        default:
-    }
-
-    socket.emit('posicion', { usuario, posicion })
-}
-
-socket.on('dibujar', (datos)=>{
-    console.log(datos);
-
-    cuadrado2.style.left = datos.situacionY + "px";
-    cuadrado2.style.top = datos.situacionX + "px";
-            
-})
-
-
-function desplazarB(objeto) {
-    var tecla = objeto.which;
-
-
-    switch (tecla) {
-        case 37:
-            cuadrado.style.left = situacionY - 220 + "px"; break;
-        case 38:
-            cuadrado.style.top = situacionX - 220 + "px"; break;
-        case 39:
-            cuadrado.style.left = situacionY - 180 + "px"; break;
-        case 40:
-            cuadrado.style.top = situacionX - 180 + "px"; break;
-        default:
-    }
-}
-

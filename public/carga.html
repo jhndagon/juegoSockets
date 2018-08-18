@@ -1,55 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8">
+
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>     
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     </script>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="./js/p5.js"></script>
+    <script src="./js/addons/p5.dom.js"></script>
+    <script src="./js/addons/p5.sound.js"></script>
+    <script src="./juego/player.js"></script>
     <script src="./socket.js"></script>
-
 </head>
 <style>
-    body{
+    body {
         background: #000000;
     }
-    article{
+
+    #canvas {
         background: green;
         height: 500px;
         text-align: center;
         display: none;
     }
-    canvas{
+
+    canvas {
         margin-top: 30px;
-        border: solid  black 10px; 
+        border: solid black 10px;
     }
-    footer{
+
+    footer {
         height: 500px;
         width: 450px;
     }
 </style>
 
 <body>
-    
-    <div id="datos" align= "center">
-        <br>
-        <br>
-        <br>
-        <h1 align="center">Esperando jugador.</h1> 
-        <img align= "center" src="4F2.gif" alt="Funny image" width="200" height="200">
-    </div>
-    <article id="canvas">
-            <canvas id="micanvas" width="500px" height="450px">
-            </canvas>
-     </article>
-        <footer>
-           
-        </footer>
-</body>
 
-<script type="text/javascript" src="canvasjs.js">
-document.getElementById("micanvas").style.opacity="0";
+    <div id="datos" align="center">
+        <br>
+        <br>
+        <br>
+        <h1 align="center">Esperando jugador.</h1>
+        <img align="center" src="4F2.gif" alt="Funny image" width="200" height="200">
+    </div>
+    <div id="canvas">
+
+    </div>
+
+</body>
 </script>
+
 </html>
