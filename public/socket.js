@@ -1,98 +1,56 @@
 var socket = io()
 
 var nick = window.location.href.split("?usuario=")[1]
-var usuario = {
-    id: null,
-    nombre: nick,
-    room: null
+var jugador;
+var colorFondo = 0;
+var jugadores;
+var control = false;
+
+function setup() {
+    jugador = new Jugador(nick, 10, 10)
+    usuario = { nick: jugador.nick, x: jugador.x, y: jugador.y }
+    socket.emit('datos', usuario);
+    var cnv = createCanvas(500, 500);
+    cnv.parent('cnv');
+    cnv.id('canva');
+    socket.on('hardBeat', (datos) => {
+        jugadores = datos;
+        control = true;
+    })
 }
 
+function draw() {
+    background(colorFondo);
+    jugador.move();
+    jugador.show();
+    
+    if(control){
 
-
-socket.emit('datos', { usuario })
+        for (let index = 0; index < jugadores.length; index++) {
+            if(jugadores[index].id !== socket.id){
+                rectMode(CENTER)
+                fill(195)
+                rect(jugadores[index].x,jugadores[index].y,25,25)
+            }    
+        }
+        var datosJugador = {
+            id: socket.id,
+            room: jugador.room,
+            x: jugador.x,
+            y:jugador.y
+        }        
+        socket.emit('update', datosJugador);       
+    }
+}
 
 socket.on('connectToRoom', function (data) {
-    usuario.id = socket.id;
-    usuario.room = data['usuario'].room
-    document.getElementById("datos").innerHTML = usuario.nombre;
-    //document.write(usuario.nombre);
-    //document.style(stilo);
-
-    document.onkeydown = desplazar;
-
-    document.getElementById('canvas').style.display = 'block';
-
-    document.addEventListener('keydown', (e) => {
-        var tecla = e.keyCode
-        socket.emit('informacion', { usuario, tecla })
-    },false);   
-
+    document.getElementById("datos").innerHTML = nick;
+    document.getElementById('cnv').style.display = 'block';
+    colorFondo = 255;
+    
 });
 
-socket.on('recibir', (datos) => {
-    console.log(`room: ${datos['usuario'].room}`)
+socket.on('recibirRoom', (dato) => {
+    jugador.room = dato;
 })
-
-
-socket.on('connect', function (data) {
-    console.log('conectado')
-})
-
-var posicion = {
-    situacionX: 0,
-    situacionY: 0
-};
-function desplazar(objeto) {
-    var tecla = objeto.which;
-
-    var situacionY = document.getElementById("cuadrado").offsetLeft;
-    var situacionX = document.getElementById("cuadrado").offsetTop;
-    switch (tecla) {
-        case 37:
-            cuadrado.style.left = situacionY - 220 + "px"; 
-            posicion.situacionX = situacionY - 220;
-            break;
-        case 38:
-            cuadrado.style.top = situacionX - 220 + "px"; 
-            posicion.situacionX = situacionX - 220;
-            break;
-        case 39:
-            cuadrado.style.left = situacionY - 180 + "px"; 
-            posicion.situacionX = situacionY - 180;
-            break;
-        case 40:
-            cuadrado.style.top = situacionX - 180 + "px"; 
-            posicion.situacionX = situacionX - 180;
-            break;
-        default:
-    }
-
-    socket.emit('posicion', { usuario, posicion })
-}
-
-socket.on('dibujar', (datos)=>{
-    console.log(datos);
-
-    cuadrado2.style.left = datos.situacionY + "px";
-    cuadrado2.style.top = datos.situacionX + "px";
-            
-})
-
-
-function desplazarB(objeto) {
-    var tecla = objeto.which;
-
-
-    switch (tecla) {
-        case 37:
-            cuadrado.style.left = situacionY - 220 + "px"; break;
-        case 38:
-            cuadrado.style.top = situacionX - 220 + "px"; break;
-        case 39:
-            cuadrado.style.left = situacionY - 180 + "px"; break;
-        case 40:
-            cuadrado.style.top = situacionX - 180 + "px"; break;
-        default:
-    }
-}
 

@@ -7,32 +7,32 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>     
     </script>
+    <script src="./js/p5.js"></script>
+    <script src="./js/p5.dom.js"></script>
+    <script src="./js/p5.sound.js"></script>
+    <script src="./juego/jugador.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="./socket.js"></script>
-
+    
 </head>
 <style>
     body{
         background: #000000;
     }
-    article{
-        background: green;
+    cvn{
+        background-color: green;
         height: 500px;
         text-align: center;
         display: none;
     }
     canvas{
-        margin-top: 30px;
+        margin: 30px;
         border: solid  black 10px; 
     }
-    footer{
-        height: 500px;
-        width: 450px;
-    }
+
 </style>
 
-<body>
-    
+<body>    
     <div id="datos" align= "center">
         <br>
         <br>
@@ -40,16 +40,6 @@
         <h1 align="center">Esperando jugador.</h1> 
         <img align= "center" src="4F2.gif" alt="Funny image" width="200" height="200">
     </div>
-    <article id="canvas">
-            <canvas id="micanvas" width="500px" height="450px">
-            </canvas>
-     </article>
-        <footer>
-           
-        </footer>
+    <div id='cnv'></div>
 </body>
-
-<script type="text/javascript" src="canvasjs.js">
-document.getElementById("micanvas").style.opacity="0";
-</script>
 </html>
