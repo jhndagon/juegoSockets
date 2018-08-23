@@ -78,11 +78,18 @@ io.on('connection', function (socket) {
     
 
     socket.on('datosCoin', (datos) => {
+        
         if(coinsPorRoom[datos.room-1].length < 10){
+
+            co = new Coin(datos.room, datos.x, datos.y, datos.valor);
             
-            co = new Coin(datos.room,datos.x,datos.y,datos.valor);
-            coinsPorRoom[datos.room-1].push(co)            
+            coinsPorRoom[datos.room-1].push(co)      
+            console.log("datos moneda asdasdasdasdasdasdasd") 
+            console.log(datos)
+            console.log(co)
+            console.log(coinsPorRoom)     
         }
+        
         //eliminar modenas de coinsPorRoom cuando un usuario la capture
     })
 
@@ -91,7 +98,7 @@ io.on('connection', function (socket) {
             coinsPorRoom[datos.room-1][datos.id].x = datos.x;
             coinsPorRoom[datos.room-1][datos.id].y = datos.y;
         }
-
+        
     })
 
 

@@ -58,6 +58,7 @@ function draw() {
             y: co.y,
             valor: co.valor
         }
+
         socket.emit('updateCoin', datosMoneda);
     }
 }
@@ -66,25 +67,25 @@ socket.on('connectToRoom', function (data) {
     document.getElementById("datos").innerHTML = nick;
     document.getElementById('cnv').style.display = 'block';
     colorFondo = 255;
+        // en un setInterval hacer que se creen las monedas cada cierta cantidad de tiempo
+        co = new moneda(random(0, ancho), random(0, alto), random(-100, 100));
+        coin = { room: jugador.room, x: co.x, y: co.y, valor: co.valor }
+        socket.emit('datosCoin', coin)
+        console.log(co);
+        socket.on('heartBeatCoin', (datos) => {
+            
+            if (datos != null) {
+                for (var index = 0; index < datos.length; index++) {
+                    co.x = datos[index].x;
+                    co.y = datos[index].y;
+                }
+            }
+            control2 = true
+        })
 
 });
 
 socket.on('recibirRoom', (dato) => {
     jugador.room = dato;
-    // en un setInterval hacer que se creen las monedas cada cierta cantidad de tiempo
-    co = new moneda(random(0, ancho), random(0, alto), random(-100, 100));
-    coin = { room: jugador.room, x: co.x, y: co.y, valor: co.valor }
-    socket.emit('datosCoin', coin)
-    console.log(jugador.room)
-    socket.on('heartBeatCoin', (datos) => {
-
-        if (datos != null) {
-            for (var index = 0; index < datos.length; index++) {
-                coin.x = datos[index].x;
-                coin.y = datos[index].y;
-            }
-        }
-        control2 = true;
-    })
 })
 
