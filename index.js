@@ -72,22 +72,15 @@ io.on('connection', function (socket) {
 
     if (io.nsps['/'].adapter.rooms["room-" + roomno].length == 2) {
         //llenar vector nposiciones
-        io.sockets.in("room-" + roomno).emit('connectToRoom', 'nueva partida');
+        io.sockets.in("room-" + roomno).emit('connectToRoom', roomno);
         
     }
     
 
     socket.on('datosCoin', (datos) => {
-        
-        if(coinsPorRoom[datos.room-1].length < 10){
-
-            co = new Coin(datos.room, datos.x, datos.y, datos.valor);
-            
+        if(typeof coinsPorRoom[datos.room-1] === 'undefined' || coinsPorRoom[datos.room-1].length < 10){
+            co = new Coin(datos.room, datos.x, datos.y, datos.valor);            
             coinsPorRoom[datos.room-1].push(co)      
-            console.log("datos moneda asdasdasdasdasdasdasd") 
-            console.log(datos)
-            console.log(co)
-            console.log(coinsPorRoom)     
         }
         
         //eliminar modenas de coinsPorRoom cuando un usuario la capture

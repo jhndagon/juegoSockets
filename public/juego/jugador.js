@@ -2,6 +2,7 @@ function Jugador(nick, x, y){
     this.nick = nick;
     this.x = x;
     this.y = y;
+    this.room = 0;
 
     this.show = function(){
         rectMode(CENTER)
