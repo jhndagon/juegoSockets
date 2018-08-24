@@ -3,8 +3,8 @@ function moneda(x,y,valor,id)
     this.nick = nick;
     this.x = x;
     this.y = y;
-    this.speedy = 10;
-    this.speedx = 10;
+    this.speedy = 1;
+    this.speedx = 1;
     this.valor = valor;
     this.id = id
 
@@ -36,5 +36,24 @@ function moneda(x,y,valor,id)
             this.x = 1;
             this.speedx *= -1;
         } 
+    }
+
+    this.colision = function(jugador){
+        
+        if( (this.y >= jugador.y && this.y <= jugador.y +25) 
+             || (this.x + 15 >= jugador.y && this.y + 25 <= jugador.y +25 )){ 
+
+                //if(this.speedx > 0){
+                    //this.speedx += 1;
+                //}
+                //else{
+                    this.speedx *= -1; 
+                //}
+            console.log("colisioono");
+        }
+        else if(this.x +25 >= jugador.x && this.x + 25 <= jugador.x +25){
+            this.speedy *= -1;
+            
+        }
     }
 }

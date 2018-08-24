@@ -36,6 +36,10 @@ function draw() {
     if (control1 && control2) {
         co.move();
         co.show();
+        co.colision(jugador)
+        /*la moneda que llega del otro jugador debe ser creado como objeto,
+        esto para que pueda haber colision con el jugador.
+        */
         for(var i = 0; i < monedas.length; i++){
             if(monedas[i].id != socket.id){
                 fill(250,247,0)
@@ -83,6 +87,9 @@ function draw() {
 
     }
 }
+
+
+
 
 socket.on('connectToRoom', function (data) {
     document.getElementById("datos").innerHTML = nick;

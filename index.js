@@ -123,8 +123,6 @@ io.on('connection', function (socket) {
                     element.y = datos.y
                 }
             });
-            //coinsPorRoom[datos.room-1][datos].x = datos.x;
-            //coinsPorRoom[datos.room-1][datos].y = datos.y;
         }
         
     })
