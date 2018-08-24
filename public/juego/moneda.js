@@ -1,11 +1,12 @@
-function moneda(x,y,valor)
+function moneda(x,y,valor,id)
 {
     this.nick = nick;
     this.x = x;
     this.y = y;
     this.speedy = 10;
     this.speedx = 10;
-    
+    this.valor = valor;
+    this.id = id
 
     this.show = function(){
         fill(250,247,0)

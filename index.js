@@ -24,6 +24,11 @@ function Coin(room,id,x,y,valor){
     this.y = y;
     this.valor = valor;
 }
+function Hueco(x,y,valor){
+    this.x = x;
+    this.y = y;
+    this.valor = valor;
+}
 //Envia información a las rooms de las monedas
 setInterval(() => {
     coinsPorRoom.forEach((coin,index) => {
@@ -54,12 +59,24 @@ io.on('connection', function (socket) {
     socket.on('update', (datos) => {
         
         var usuario = usuariosPorRoom[datos.room-1]
+        
         for(var index = 0; index < usuario.length; index++){
             if(usuario[index].id === socket.id){
                 usuario[index].x = datos.x;
                 usuario[index].y = datos.y;
             }
         }
+    })
+    socket.on('huecos', (datos) => {
+        
+        var hole = new Hueco(datos.x,datos.y,datos.valor)
+        datos.room = roomno
+        socket.emit('recibirRoom', roomno)
+        usuarios.push(player)
+        if (usuarios.length == 2) {
+            usuariosPorRoom.push(usuarios);
+            usuarios = [];
+        }        
     })
 
     //Increase roomno 2 clients are present in a room.
@@ -73,13 +90,24 @@ io.on('connection', function (socket) {
     if (io.nsps['/'].adapter.rooms["room-" + roomno].length == 2) {
         //llenar vector nposiciones
         io.sockets.in("room-" + roomno).emit('connectToRoom', roomno);
-        
+        var huecos = []
+        for(var j=0;j<4;j++){
+            if(j<2){
+                hueco = new Hueco(Math.random(0, 950)*500, Math.random(0, 500)*500,1);
+            }
+            else{
+                hueco = new Hueco(Math.random(0, 950)*500, Math.random(0, 500)*500,-1);
+            }
+            huecos.push(hueco);
+        }
+        io.sockets.in("room-" + roomno).emit('sendholes', huecos);
     }
     
 
     socket.on('datosCoin', (datos) => {
         if(typeof coinsPorRoom[datos.room-1] === 'undefined' || coinsPorRoom[datos.room-1].length < 10){
-            co = new Coin(datos.room, datos.x, datos.y, datos.valor);            
+            co = new Coin(datos.room, datos.id, datos.x, datos.y, datos.valor); 
+         
             coinsPorRoom[datos.room-1].push(co)      
         }
         
@@ -88,8 +116,15 @@ io.on('connection', function (socket) {
 
     socket.on('updateCoin', (datos) => {
         if(datos != null){
-            coinsPorRoom[datos.room-1][datos.id].x = datos.x;
-            coinsPorRoom[datos.room-1][datos.id].y = datos.y;
+            coinsRoom = coinsPorRoom[datos.room-1]
+            coinsRoom.forEach(element => {
+                if(element.id == socket.id){
+                    element.x = datos.x
+                    element.y = datos.y
+                }
+            });
+            //coinsPorRoom[datos.room-1][datos].x = datos.x;
+            //coinsPorRoom[datos.room-1][datos].y = datos.y;
         }
         
     })
