@@ -8,11 +8,11 @@ var control1 = false;
 var control2 = false;
 var co;
 var hue = new Array(4);
-var monedas;
+var monedas = [];
 var alto = 500, ancho = 950;
 
 function setup() {
-    jugador = new Jugador(nick, 10, 10)
+    jugador = new Jugador(nick, random(0, ancho), random(0, alto))
     usuario = { nick: jugador.nick, x: jugador.x, y: jugador.y }
     socket.emit('datos', usuario);
     socket.on('heartBeat', (datos) => {
@@ -51,12 +51,12 @@ function draw() {
             }
         }
         for (var j = 0; j < 4; j++) {
-            hue[j].show();
+            //hue[j].show();
         }
         for (let index = 0; index < jugadores.length; index++) {
             if (jugadores[index].id !== socket.id) {
                 rectMode(CENTER)
-                fill(234, 3, 3)
+                fill(234, 3, 3);
                 rect(jugadores[index].x, jugadores[index].y, 25, 25)
             }
         }
@@ -87,8 +87,6 @@ function draw() {
 
     }
 }
-
-
 
 
 socket.on('connectToRoom', function (data) {

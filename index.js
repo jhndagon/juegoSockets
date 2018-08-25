@@ -60,7 +60,7 @@ io.on('connection', function (socket) {
         
         var usuario = usuariosPorRoom[datos.room-1]
         
-        for(var index = 0; index < usuario.length; index++){
+        for(var index = 0; usuario !== undefined && index < usuario.length; index++){
             if(usuario[index].id === socket.id){
                 usuario[index].x = datos.x;
                 usuario[index].y = datos.y;
@@ -117,12 +117,15 @@ io.on('connection', function (socket) {
     socket.on('updateCoin', (datos) => {
         if(datos != null){
             coinsRoom = coinsPorRoom[datos.room-1]
-            coinsRoom.forEach(element => {
-                if(element.id == socket.id){
-                    element.x = datos.x
-                    element.y = datos.y
-                }
-            });
+            if(coinsPorRoom !== undefined){
+                coinsRoom.forEach(element => {
+                    if(element.id == socket.id){
+                        element.x = datos.x
+                        element.y = datos.y
+                    }
+                });
+            }
+            
         }
         
     })
@@ -149,6 +152,6 @@ io.on('connection', function (socket) {
 
 
 
-server.listen(process.env.PORT || 3001, function () {
+server.listen(process.env.PORT || 3000, function () {
     console.log('Escuchando en localhost:3000')
 })
