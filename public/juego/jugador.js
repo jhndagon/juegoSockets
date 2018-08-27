@@ -3,6 +3,7 @@ function Jugador(nick, x, y){
     this.x = x;
     this.y = y;
     this.room = 0;
+    this.puntaje = 0;
 
     this.show = function(){
         rectMode(CENTER)

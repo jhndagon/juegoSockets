@@ -47,8 +47,8 @@ io.on('connection', function (socket) {
 
     socket.on('datos', (datos) => {
         var player = new Player(socket.id,datos.nick,datos.x,datos.y)
-        datos.room = roomno
-        socket.emit('recibirRoom', roomno)
+        datos = {room: roomno, id: Math.floor(Math.random()*10000)}
+        socket.emit('recibirRoom', datos)
         usuarios.push(player)
         if (usuarios.length == 2) {
             usuariosPorRoom.push(usuarios);
@@ -67,22 +67,12 @@ io.on('connection', function (socket) {
             }
         }
     })
-    socket.on('huecos', (datos) => {
-        
-        var hole = new Hueco(datos.x,datos.y,datos.valor)
-        datos.room = roomno
-        socket.emit('recibirRoom', roomno)
-        usuarios.push(player)
-        if (usuarios.length == 2) {
-            usuariosPorRoom.push(usuarios);
-            usuarios = [];
-        }        
-    })
 
     //Increase roomno 2 clients are present in a room.
     if (io.nsps['/'].adapter.rooms["room-" + roomno]
         && io.nsps['/'].adapter.rooms["room-" + roomno].length > 1) {
         ++roomno;
+        coinsPorRoom.push(new Array(0))
         coinsPorRoom[roomno-1].push()
     }
     socket.join("room-" + roomno);
@@ -90,17 +80,6 @@ io.on('connection', function (socket) {
     if (io.nsps['/'].adapter.rooms["room-" + roomno].length == 2) {
         //llenar vector nposiciones
         io.sockets.in("room-" + roomno).emit('connectToRoom', roomno);
-        var huecos = []
-        for(var j=0;j<4;j++){
-            if(j<2){
-                hueco = new Hueco(Math.random(0, 950)*500, Math.random(0, 500)*500,1);
-            }
-            else{
-                hueco = new Hueco(Math.random(0, 950)*500, Math.random(0, 500)*500,-1);
-            }
-            huecos.push(hueco);
-        }
-        io.sockets.in("room-" + roomno).emit('sendholes', huecos);
     }
     
 
@@ -110,43 +89,32 @@ io.on('connection', function (socket) {
          
             coinsPorRoom[datos.room-1].push(co)      
         }
-        
-        //eliminar modenas de coinsPorRoom cuando un usuario la capture
     })
 
     socket.on('updateCoin', (datos) => {
         if(datos != null){
             coinsRoom = coinsPorRoom[datos.room-1]
-            if(coinsPorRoom !== undefined){
+            if(coinsPorRoom !== undefined && datos.room){
                 coinsRoom.forEach(element => {
                     if(element.id == socket.id){
                         element.x = datos.x
                         element.y = datos.y
                     }
                 });
-            }
-            
+            }            
+        }        
+    })
+
+    socket.on('actualizarMonedas', (datos) => {
+        if(datos){
+            coinsPorRoom[datos.room-1] = datos.moneda
         }
-        
     })
 
 
     socket.on('disconnect', function () {
         id = socket.id
         console.log("Usuario desconectado")
-        
-        //buscar como eliminar salas
-        /*
-        for (let index = 0; index < usuariosPorRoom.length; index++) {
-            for (let index1 = 0; index1 < usuariosPorRoom[index].length; index1++) {
-                if(usuariosPorRoom[index][index1].id === id){
-                    console.log("algo")
-                    break;
-                }                
-            }
-            
-        }*/
-
     });
 });
 

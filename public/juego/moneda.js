@@ -50,10 +50,8 @@ function moneda(x, y, valor, id) {
                 else {
                     this.x = jugador.x + d
                 }
-
             }
             else if (this.x > jugador.x - 12 && this.x < jugador.x + 13) {
-                console.log("choco con eje x")
                 this.speedy *= -1
                 if (this.y < jugador.y + 10) {
                     this.y = jugador.y - d
@@ -62,6 +60,10 @@ function moneda(x, y, valor, id) {
                     this.y = jugador.y + d
                 }
             }
+            jugador.puntaje += this.valor;
+            this.valor *= -1;
+            return true;
         }
+        return false;
     }
 }

@@ -7,11 +7,15 @@ var jugadores;
 var control1 = false;
 var control2 = false;
 var co;
-var hue = new Array(4);
 var monedas = [];
+var monedas1 = new Array(1);
+
 var alto = 500, ancho = 950;
 
 function setup() {
+    // en un setInterval hacer que se creen las monedas cada cierta cantidad de tiempo
+    monedas1[0] = new moneda(random(0, ancho), random(0, alto), int(random(-100, 100)), socket.id);
+
     jugador = new Jugador(nick, random(0, ancho), random(0, alto))
     usuario = { nick: jugador.nick, x: jugador.x, y: jugador.y }
     socket.emit('datos', usuario);
@@ -19,8 +23,7 @@ function setup() {
         jugadores = datos;
         control1 = true
     })
-    // en un setInterval hacer que se creen las monedas cada cierta cantidad de tiempo
-    co = new moneda(random(0, ancho), random(0, alto), int(random(-100, 100)), socket.id);
+
     var cnv = createCanvas(ancho, alto);
     cnv.parent('cnv');
     cnv.id('canva');
@@ -32,27 +35,9 @@ function draw() {
     jugador.move();
     jugador.show();
 
-
     if (control1 && control2) {
-        co.move();
-        co.show();
-        co.colision(jugador)
-        /*la moneda que llega del otro jugador debe ser creado como objeto,
-        esto para que pueda haber colision con el jugador.
-        */
-        for(var i = 0; i < monedas.length; i++){
-            if(monedas[i].id != socket.id){
-                fill(250,247,0)
-                if(monedas[i].valor < 0){
-                    fill(234,3,3)
-                }
-                rectMode(CENTER)        
-                ellipse(monedas[i].x,monedas[i].y,15,20)
-            }
-        }
-        for (var j = 0; j < 4; j++) {
-            //hue[j].show();
-        }
+        //co.move()
+        //co.show()
         for (let index = 0; index < jugadores.length; index++) {
             if (jugadores[index].id !== socket.id) {
                 rectMode(CENTER)
@@ -64,30 +49,52 @@ function draw() {
             id: socket.id,
             room: jugador.room,
             x: jugador.x,
-            y: jugador.y
+            y: jugador.y,
+            puntaje: jugador.puntaje
         }
         socket.emit('update', datosJugador);
 
-        var datosMoneda = {
+        /*la moneda que llega del otro jugador debe ser creado como objeto,
+        esto para que pueda haber colision con el jugador.
+        */
+        for (var i = 0; i < monedas.length; i++) {            
+            if (monedas[i].idS != socket.id) {
+                if (monedas1[i] == null) {
+                    moneda = new moneda(monedas[i].x, monedas[i].y, monedas[i].valor, monedas[i].idS)
+                    monedas1.push(moneda)
+                }
+                
+                    monedas1[i].x = monedas[i].x
+                    monedas1[i].y = monedas[i].y
+                    monedas1[i].valor = monedas[i].valor;
+                              
+                if (monedas1[i].colision(jugador)) {
+                    //monedas1.splice(i, 1)
+                    datos = { room: jugador.room, moneda: monedas1 }
+                    socket.emit('actualizarMonedas', datos)
+                   
+                }
+            }
+            else{
+                monedas1[i].move()                
+                datos = { room: jugador.room, moneda: monedas1 }
+                socket.emit('actualizarMonedas', datos)
+            }
+            monedas1[i].show()
+
+        }
+
+        /*var datosMoneda = {
             room: jugador.room,
-            id: socket.id, //se obtiene del array monedas
-            x: co.x,
-            y: co.y,
-            valor: co.valor
-        }
-
-        var datosHueco = {
-            x: co.x,
-            y: co.y,
-            valor: co.valor
-        }
-        socket.emit('updateCoin', datosMoneda);
-
-
-
+            id: monedas1[0].id,
+            idS: socket.id,
+            x: monedas1[0].x,
+            y: monedas1[0].y,
+            valor: monedas1[0].valor
+        }*/
+        //socket.emit('updateCoin', datosMoneda);
     }
 }
-
 
 socket.on('connectToRoom', function (data) {
     document.getElementById("datos").innerHTML = nick;
@@ -100,19 +107,12 @@ socket.on('connectToRoom', function (data) {
             }
         })
         control2 = true;
-
     }
 });
-socket.on('sendholes', (dato) => {
-    control2 = true
-    for (var j = 0; j < 4; j++) {
-        hue[j] = new hueco(dato[j].x, dato[j].y, dato[j].valor);
-    }
-})
 
 socket.on('recibirRoom', (dato) => {
-    jugador.room = dato;
-    console.log(co)
-    coin = { room: dato, x: co.x, y: co.y, valor: co.valor, id: socket.id }
+    jugador.room = dato.room;
+    monedas1[0].id = dato.id
+    coin = { room: dato.room, x: monedas1[0].x, y: monedas1[0].y, valor: monedas1[0].valor, idS: socket.id, id: dato.id }
     socket.emit('datosCoin', coin)
 })
