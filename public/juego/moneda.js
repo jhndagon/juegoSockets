@@ -1,4 +1,4 @@
-function moneda(x, y, valor, id, idS) {
+function moneda(x, y, valor, id, idS, nick) {
     this.nick = nick;
     this.x = x;
     this.y = y;

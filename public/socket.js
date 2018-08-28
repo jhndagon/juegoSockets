@@ -8,14 +8,15 @@ var control1 = false;
 var control2 = false;
 var co;
 var datos = null;
-var monedas1 = new Array(1);
+var monedas1 = new Array(0);
 
 var alto = 500, ancho = 950;
 
 function setup() {
     // en un setInterval hacer que se creen las monedas cada cierta cantidad de tiempo
-    monedas1[0] = new moneda(random(0, ancho), random(0, alto), int(random(-100, 100)), socket.id);
-
+    co = new moneda(random(0, ancho), random(0, alto), int(random(-100, 100)), 0,socket.id, nick);
+    monedas1.push(co);
+        
     jugador = new Jugador(nick, random(0, ancho), random(0, alto))
     usuario = { nick: jugador.nick, x: jugador.x, y: jugador.y }
     socket.emit('datos', usuario);
@@ -55,17 +56,20 @@ function draw() {
         procesar(datos)        
         monedas1.forEach(moneda => {
             moneda.show();
-            if (moneda.idS != socket.id) {
+            if (moneda.idS == socket.id) {
                 moneda.move()
                 var datos = {
                     room: jugador.room,
                     x: moneda.x,
                     y: moneda.y,
-                    valor: moneda.valor
+                    valor: moneda.valor,
+                    idS: socket.id,
+                    id: moneda.id
                 }
                 socket.emit('updateCoin', datos)
+                
             }
-            moneda.colision(jugador)
+            //moneda.colision(jugador)
             
         });
 
@@ -87,19 +91,19 @@ socket.on('connectToRoom', function (data) {
 socket.on('recibirRoom', (dato) => {
     jugador.room = dato.room;
     monedas1[0].id = dato.id
-    coin = { room: dato.room, x: monedas1[0].x, y: monedas1[0].y, valor: monedas1[0].valor, idS: socket.id, id: dato.id }
+    coin = { room: dato.room, x: monedas1[0].x, y: monedas1[0].y, valor: monedas1[0].valor, idS: socket.id, id: dato.id, nick: nick }
     socket.emit('datosCoin', coin)
 })
 
 function procesar(datos){
     if (datos !== null) {
-        var existe = false;
+        var existe = false
         datos.forEach(elemento => {
             //Comprobar que la moneda sea diferente a alguna creada en este cliente
             if (elemento.idS != socket.id) {
                 monedas1.forEach((element) => {
                     //comprueba si existe una moneda ya creada
-                    if (element.id == elemento.id) {
+                    if (element.id == elemento.id && element.idS != socket.id) {
                         existe = true;
                         element.x = elemento.x
                         element.y = elemento.y
@@ -107,8 +111,9 @@ function procesar(datos){
                     }
                 });
                 if (!existe) {
-                    var co = new moneda(elemento.x, elemento.y, elemento.valor, elemento.id, elemento.idS)
-                    monedas1.push(co)
+                    var co = new moneda(elemento.x, elemento.y, elemento.valor, elemento.id, elemento.idS, elemento.nick)
+                    monedas1.push(co);
+                    socket.emit('actualizarMonedas',{room:jugador.room, moneda:monedas1})                    
                 }
             }
         });

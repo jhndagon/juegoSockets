@@ -11,53 +11,55 @@ var usuariosPorRoom = []
 
 var coinsPorRoom = new Array(new Array(0))
 
-function Player(id,nick,x,y){
+function Player(id, nick, x, y) {
     this.id = id;
     this.nick = nick;
     this.x = x;
     this.y = y;
 }
-function Coin(room,id,idS,x,y,valor){
+function Coin(room, id, idS, x, y, valor, nick) {
     this.room = room;
     this.idS = idS;
     this.id = id;
     this.x = x;
     this.y = y;
     this.valor = valor;
+    this.nick = nick;
 }
 //Envia información a las rooms de las monedas
 setInterval(() => {
-    coinsPorRoom.forEach((coin,index) => {
-        io.sockets.in("room-"+(index+1)).emit("heartBeatCoin", coin)        
+    coinsPorRoom.forEach((coin, index) => {
+        io.sockets.in("room-" + (index + 1)).emit("heartBeatCoin", coin)
     });
-},17);
+}, 17);
+
 //enviar informacion a todas las rooms de la informacion de los jugadores
 setInterval(() => {
-    usuariosPorRoom.forEach((jugadores,index) => {
-        io.sockets.in("room-"+(index+1)).emit("heartBeat",jugadores)        
+    usuariosPorRoom.forEach((jugadores, index) => {
+        io.sockets.in("room-" + (index + 1)).emit("heartBeat", jugadores)
     });
-},33);
+}, 33);
 
 io.on('connection', function (socket) {
     console.log('usuario conectado');
 
+    //informacion del jugador
     socket.on('datos', (datos) => {
-        var player = new Player(socket.id,datos.nick,datos.x,datos.y)
-        datos = {room: roomno, id: Math.floor(Math.random()*10000)}
+        var player = new Player(socket.id, datos.nick, datos.x, datos.y)
+        datos = { room: roomno, id: Math.floor(Math.random() * 10000) }
         socket.emit('recibirRoom', datos)
         usuarios.push(player)
         if (usuarios.length == 2) {
             usuariosPorRoom.push(usuarios);
             usuarios = [];
-        }        
+        }
     })
 
+    //actualizacion del movimiento del jugador
     socket.on('update', (datos) => {
-        
-        var usuario = usuariosPorRoom[datos.room-1]
-        
-        for(var index = 0; usuario !== undefined && index < usuario.length; index++){
-            if(usuario[index].id === socket.id){
+        var usuario = usuariosPorRoom[datos.room - 1]
+        for (var index = 0; usuario !== undefined && index < usuario.length; index++) {
+            if (usuario[index].id === socket.id) {
                 usuario[index].x = datos.x;
                 usuario[index].y = datos.y;
             }
@@ -69,7 +71,7 @@ io.on('connection', function (socket) {
         && io.nsps['/'].adapter.rooms["room-" + roomno].length > 1) {
         ++roomno;
         coinsPorRoom.push(new Array(0))
-        coinsPorRoom[roomno-1].push()
+        coinsPorRoom[roomno - 1].push()
     }
     socket.join("room-" + roomno);
 
@@ -77,33 +79,33 @@ io.on('connection', function (socket) {
         //llenar vector nposiciones
         io.sockets.in("room-" + roomno).emit('connectToRoom', roomno);
     }
-    
 
+    //informacion de las monedas
     socket.on('datosCoin', (datos) => {
-        if(typeof coinsPorRoom[datos.room-1] === 'undefined' || coinsPorRoom[datos.room-1].length < 10){
-            co = new Coin(datos.room, datos.id, datos.idS, datos.x, datos.y, datos.valor);        
-            coinsPorRoom[datos.room-1].push(co)      
+        if (typeof coinsPorRoom[datos.room - 1] === 'undefined' || coinsPorRoom[datos.room - 1].length < 10) {
+            co = new Coin(datos.room, datos.id, datos.idS, datos.x, datos.y, datos.valor, datos.nick);
+            coinsPorRoom[datos.room - 1].push(co)
         }
     })
 
     socket.on('updateCoin', (datos) => {
-        if(datos != null){
-            coinsRoom = coinsPorRoom[datos.room-1]
-            if(coinsPorRoom !== undefined && datos.room){
+        if (datos != null) {
+            coinsRoom = coinsPorRoom[datos.room - 1]
+            if (coinsPorRoom !== undefined && datos.room) {
                 coinsRoom.forEach(element => {
-                    if(element.idS == socket.id){
+                    if (element.idS == socket.id && element.id == datos.id) {
                         element.x = datos.x
                         element.y = datos.y
                         element.valor = datos.valor
                     }
                 });
-            }            
-        }        
+            }
+        }
     })
 
     socket.on('actualizarMonedas', (datos) => {
-        if(datos){
-            coinsPorRoom[datos.room-1] = datos.moneda
+        if (datos) {
+            coinsPorRoom[datos.room - 1] = datos.moneda;
         }
     })
 
@@ -116,6 +118,6 @@ io.on('connection', function (socket) {
 
 
 
-server.listen(process.env.PORT || 3000, function () {
+server.listen(process.env.PORT || 3001, function () {
     console.log('Escuchando en localhost:3000')
 })
