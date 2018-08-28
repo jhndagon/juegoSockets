@@ -7,7 +7,7 @@ var jugadores;
 var control1 = false;
 var control2 = false;
 var co;
-var monedas = [];
+var datos = null;
 var monedas1 = new Array(1);
 
 var alto = 500, ancho = 950;
@@ -27,7 +27,6 @@ function setup() {
     var cnv = createCanvas(ancho, alto);
     cnv.parent('cnv');
     cnv.id('canva');
-
 }
 
 function draw() {
@@ -36,8 +35,6 @@ function draw() {
     jugador.show();
 
     if (control1 && control2) {
-        //co.move()
-        //co.show()
         for (let index = 0; index < jugadores.length; index++) {
             if (jugadores[index].id !== socket.id) {
                 rectMode(CENTER)
@@ -54,45 +51,24 @@ function draw() {
         }
         socket.emit('update', datosJugador);
 
-        /*la moneda que llega del otro jugador debe ser creado como objeto,
-        esto para que pueda haber colision con el jugador.
-        */
-        for (var i = 0; i < monedas.length; i++) {            
-            if (monedas[i].idS != socket.id) {
-                if (monedas1[i] == null) {
-                    moneda = new moneda(monedas[i].x, monedas[i].y, monedas[i].valor, monedas[i].idS)
-                    monedas1.push(moneda)
-                }
-                
-                    monedas1[i].x = monedas[i].x
-                    monedas1[i].y = monedas[i].y
-                    monedas1[i].valor = monedas[i].valor;
-                              
-                if (monedas1[i].colision(jugador)) {
-                    //monedas1.splice(i, 1)
-                    datos = { room: jugador.room, moneda: monedas1 }
-                    socket.emit('actualizarMonedas', datos)
-                   
-                }
-            }
-            else{
-                monedas1[i].move()                
-                datos = { room: jugador.room, moneda: monedas1 }
-                socket.emit('actualizarMonedas', datos)
-            }
-            monedas1[i].show()
 
-        }
+        procesar(datos)        
+        monedas1.forEach(moneda => {
+            moneda.show();
+            if (moneda.idS != socket.id) {
+                moneda.move()
+                var datos = {
+                    room: jugador.room,
+                    x: moneda.x,
+                    y: moneda.y,
+                    valor: moneda.valor
+                }
+                socket.emit('updateCoin', datos)
+            }
+            moneda.colision(jugador)
+            
+        });
 
-        /*var datosMoneda = {
-            room: jugador.room,
-            id: monedas1[0].id,
-            idS: socket.id,
-            x: monedas1[0].x,
-            y: monedas1[0].y,
-            valor: monedas1[0].valor
-        }*/
-        //socket.emit('updateCoin', datosMoneda);
     }
 }
 
@@ -101,10 +77,8 @@ socket.on('connectToRoom', function (data) {
     document.getElementById('cnv').style.display = 'block';
     colorFondo = 255;
     if (data) {
-        socket.on('heartBeatCoin', (datos) => {
-            if (datos !== null) {
-                monedas = datos;
-            }
+        socket.on('heartBeatCoin', (monedas) => {
+            datos = monedas            
         })
         control2 = true;
     }
@@ -116,3 +90,27 @@ socket.on('recibirRoom', (dato) => {
     coin = { room: dato.room, x: monedas1[0].x, y: monedas1[0].y, valor: monedas1[0].valor, idS: socket.id, id: dato.id }
     socket.emit('datosCoin', coin)
 })
+
+function procesar(datos){
+    if (datos !== null) {
+        var existe = false;
+        datos.forEach(elemento => {
+            //Comprobar que la moneda sea diferente a alguna creada en este cliente
+            if (elemento.idS != socket.id) {
+                monedas1.forEach((element) => {
+                    //comprueba si existe una moneda ya creada
+                    if (element.id == elemento.id) {
+                        existe = true;
+                        element.x = elemento.x
+                        element.y = elemento.y
+                        element.valor = elemento.valor
+                    }
+                });
+                if (!existe) {
+                    var co = new moneda(elemento.x, elemento.y, elemento.valor, elemento.id, elemento.idS)
+                    monedas1.push(co)
+                }
+            }
+        });
+    }
+}

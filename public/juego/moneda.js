@@ -1,4 +1,4 @@
-function moneda(x, y, valor, id) {
+function moneda(x, y, valor, id, idS) {
     this.nick = nick;
     this.x = x;
     this.y = y;
@@ -6,6 +6,7 @@ function moneda(x, y, valor, id) {
     this.speedx = 3;
     this.valor = valor;
     this.id = id
+    this.idS = idS
 
     this.show = function () {
         ellipseMode(CENTER)
@@ -60,8 +61,8 @@ function moneda(x, y, valor, id) {
                     this.y = jugador.y + d
                 }
             }
-            jugador.puntaje += this.valor;
-            this.valor *= -1;
+            //jugador.puntaje += this.valor;
+            //this.valor *= -1;
             return true;
         }
         return false;

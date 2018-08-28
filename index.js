@@ -17,14 +17,10 @@ function Player(id,nick,x,y){
     this.x = x;
     this.y = y;
 }
-function Coin(room,id,x,y,valor){
+function Coin(room,id,idS,x,y,valor){
     this.room = room;
+    this.idS = idS;
     this.id = id;
-    this.x = x;
-    this.y = y;
-    this.valor = valor;
-}
-function Hueco(x,y,valor){
     this.x = x;
     this.y = y;
     this.valor = valor;
@@ -34,7 +30,7 @@ setInterval(() => {
     coinsPorRoom.forEach((coin,index) => {
         io.sockets.in("room-"+(index+1)).emit("heartBeatCoin", coin)        
     });
-},33);
+},17);
 //enviar informacion a todas las rooms de la informacion de los jugadores
 setInterval(() => {
     usuariosPorRoom.forEach((jugadores,index) => {
@@ -85,8 +81,7 @@ io.on('connection', function (socket) {
 
     socket.on('datosCoin', (datos) => {
         if(typeof coinsPorRoom[datos.room-1] === 'undefined' || coinsPorRoom[datos.room-1].length < 10){
-            co = new Coin(datos.room, datos.id, datos.x, datos.y, datos.valor); 
-         
+            co = new Coin(datos.room, datos.id, datos.idS, datos.x, datos.y, datos.valor);        
             coinsPorRoom[datos.room-1].push(co)      
         }
     })
@@ -96,9 +91,10 @@ io.on('connection', function (socket) {
             coinsRoom = coinsPorRoom[datos.room-1]
             if(coinsPorRoom !== undefined && datos.room){
                 coinsRoom.forEach(element => {
-                    if(element.id == socket.id){
+                    if(element.idS == socket.id){
                         element.x = datos.x
                         element.y = datos.y
+                        element.valor = datos.valor
                     }
                 });
             }            
