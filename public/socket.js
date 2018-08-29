@@ -31,13 +31,13 @@ function draw() {
     jugador.move();
     jugador.show();
 
+
     if (control1 && control2) {
         for (let index = 0; index < jugadores.length; index++) {
             if (jugadores[index].id !== socket.id) {
                 rectMode(CENTER)
                 fill(234, 3, 3);
-                rect(jugadores[index].x, jugadores[index].y, 25, 25)
-                
+                rect(jugadores[index].x, jugadores[index].y, 25, 25)                
             }
             puntaje += "Jugador: "+ jugadores[index].nick +", puntaje: " +jugadores[index].puntaje +"<br>"
             document.getElementById('puntaje').innerHTML = puntaje
@@ -85,6 +85,11 @@ function draw() {
         });
 
     }
+
+    if(jugador.puntaje > 3000){
+        noLoop()
+        socket.emit('ganador', {gano: jugador.nick, room: jugador.room})
+    }
 }
 
 socket.on('connectToRoom', function (data) {
@@ -101,13 +106,18 @@ socket.on('connectToRoom', function (data) {
 
 socket.on('recibirRoom', (dato) => {
     // en un setInterval hacer que se creen las monedas cada cierta cantidad de tiempo
-    co = new moneda(random(0, ancho), random(0, alto), int(random(0, 100)), 0, socket.id, nick, 0);
+    co = new moneda(random(0, ancho), random(0, alto), int(random(0, 100)), 0, socket.id, nick, 0, 250);
     monedas1.push(co);
     jugador.room = dato.room;
     monedas1[0].id = dato.id
     monedas1[0].room = jugador.room
     coin = { room: dato.room, x: monedas1[0].x, y: monedas1[0].y, valor: monedas1[0].valor, idS: socket.id, id: dato.id, nick: nick }
     socket.emit('datosCoin', coin)
+})
+
+socket.on('gane', (gano) => {
+    noLoop()
+    document.getElementById('cnv').innerHTML = "Ganador: "+ gano
 })
  
 function procesar(datos) {
@@ -135,12 +145,3 @@ function procesar(datos) {
     }
 }
 
-
-document.onkeydown = function () {
-    if (window.event && window.event.keyCode == 116) {
-        window.event.keyCode = 505;
-    }
-    if (window.event && window.event.keyCode == 505) {
-        return false;
-    }
-}

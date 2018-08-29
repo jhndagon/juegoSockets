@@ -44,6 +44,21 @@ setInterval(() => {
 io.on('connection', function (socket) {
     console.log('usuario conectado');
 
+    //Increase roomno 2 clients are present in a room.
+    if (io.nsps['/'].adapter.rooms["room-" + roomno]
+        && io.nsps['/'].adapter.rooms["room-" + roomno].length > 1) {
+        ++roomno;
+        coinsPorRoom.push(new Array(0))
+        coinsPorRoom[roomno - 1].push()
+        console.log(roomno)
+    }
+    socket.join("room-" + roomno);
+
+    if (io.nsps['/'].adapter.rooms["room-" + roomno].length == 2) {
+        //llenar vector nposiciones
+        io.sockets.in("room-" + roomno).emit('connectToRoom', roomno);
+    }
+
     //informacion del jugador
     socket.on('datos', (datos) => {
         var player = new Player(socket.id, datos.nick, datos.x, datos.y, datos.puntaje)
@@ -66,27 +81,15 @@ io.on('connection', function (socket) {
                 usuario[index].puntaje = datos.puntaje
             }
         }
-    })
-
-    //Increase roomno 2 clients are present in a room.
-    if (io.nsps['/'].adapter.rooms["room-" + roomno]
-        && io.nsps['/'].adapter.rooms["room-" + roomno].length > 1) {
-        ++roomno;
-        coinsPorRoom.push(new Array(0))
-        coinsPorRoom[roomno - 1].push()
-    }
-    socket.join("room-" + roomno);
-
-    if (io.nsps['/'].adapter.rooms["room-" + roomno].length == 2) {
-        //llenar vector nposiciones
-        io.sockets.in("room-" + roomno).emit('connectToRoom', roomno);
-    }
+    })    
 
     //informacion de las monedas
     socket.on('datosCoin', (datos) => {
         if (typeof coinsPorRoom[datos.room - 1] === 'undefined' || coinsPorRoom[datos.room - 1].length < 10) {
             co = new Coin(datos.room, datos.id, datos.idS, datos.x, datos.y, datos.valor, datos.nick);
-            coinsPorRoom[datos.room - 1].push(co)
+            if(coinsPorRoom[datos.room - 1].length < 3){
+                coinsPorRoom[datos.room - 1].push(co)
+            }            
         }
     })
 
@@ -112,6 +115,11 @@ io.on('connection', function (socket) {
         }
     })
 
+    socket.on('ganador', (gano) => {
+        //agregar room 
+        //socket.emit('gane', gano.gano.nick)
+        io.sockets.in("room-" + gano.room).emit('gane', gano.gano.nick);
+    })
 
     socket.on('disconnect', function () {
         id = socket.id

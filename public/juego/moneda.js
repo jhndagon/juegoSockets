@@ -1,4 +1,4 @@
-function moneda(x, y, valor, id, idS, nick, room) {
+function moneda(x, y, valor, id, idS, nick, room, color) {
     this.nick = nick;
     this.x = x;
     this.y = y;
@@ -8,13 +8,12 @@ function moneda(x, y, valor, id, idS, nick, room) {
     this.id = id
     this.idS = idS
     this.room = room;
+    this.color = color
 
     this.show = function () {
         ellipseMode(CENTER)
-        fill(250, 247, 0)
-        if (valor < 0) {
-            fill(234, 3, 3)
-        }
+        fill(this.color, 247, 0)
+
         rectMode(CENTER)
         ellipse(this.x, this.y, 15, 20)
     }

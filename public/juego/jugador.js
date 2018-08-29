@@ -12,13 +12,16 @@ function Jugador(nick, x, y, puntaje){
     }
 
     this.move = function(){
-        this.x = mouseX;
-        this.y = mouseY;
-        if(mouseX< 0 || mouseX >800){
-            this.x = 350/2;
+        
+        if(mouseX < 0 || mouseX >800){
+            this.x = 800/2;
+            return;
         }
         if(mouseY < 0 || mouseY> 350){
             this.y = 400;
+            return;
         }
+        this.x = mouseX;
+        this.y = mouseY;
     }
 }
