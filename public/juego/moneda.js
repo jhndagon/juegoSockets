@@ -1,12 +1,13 @@
-function moneda(x, y, valor, id, idS, nick) {
+function moneda(x, y, valor, id, idS, nick, room) {
     this.nick = nick;
     this.x = x;
     this.y = y;
-    this.speedy = 3;
-    this.speedx = 3;
+    this.speedy = 8;
+    this.speedx = 8;
     this.valor = valor;
     this.id = id
     this.idS = idS
+    this.room = room;
 
     this.show = function () {
         ellipseMode(CENTER)
@@ -20,8 +21,8 @@ function moneda(x, y, valor, id, idS, nick) {
 
     this.move = function () {
         this.y += this.speedy;
-        if (this.y >= 450) {
-            this.y = 449;
+        if (this.y >= 350) {
+            this.y = 349;
             this.speedy *= -1;
         }
         else if (this.y < 0) {
@@ -29,8 +30,8 @@ function moneda(x, y, valor, id, idS, nick) {
             this.speedy *= -1;
         }
         this.x += this.speedx;
-        if (this.x >= 950) {
-            this.x = 949;
+        if (this.x >= 800) {
+            this.x = 799;
             this.speedx *= -1;
         }
         else if (this.x < 0) {

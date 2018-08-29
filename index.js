@@ -11,11 +11,12 @@ var usuariosPorRoom = []
 
 var coinsPorRoom = new Array(new Array(0))
 
-function Player(id, nick, x, y) {
+function Player(id, nick, x, y, puntaje) {
     this.id = id;
     this.nick = nick;
     this.x = x;
     this.y = y;
+    this.puntaje = puntaje
 }
 function Coin(room, id, idS, x, y, valor, nick) {
     this.room = room;
@@ -45,7 +46,7 @@ io.on('connection', function (socket) {
 
     //informacion del jugador
     socket.on('datos', (datos) => {
-        var player = new Player(socket.id, datos.nick, datos.x, datos.y)
+        var player = new Player(socket.id, datos.nick, datos.x, datos.y, datos.puntaje)
         datos = { room: roomno, id: Math.floor(Math.random() * 10000) }
         socket.emit('recibirRoom', datos)
         usuarios.push(player)
@@ -62,6 +63,7 @@ io.on('connection', function (socket) {
             if (usuario[index].id === socket.id) {
                 usuario[index].x = datos.x;
                 usuario[index].y = datos.y;
+                usuario[index].puntaje = datos.puntaje
             }
         }
     })
@@ -106,13 +108,22 @@ io.on('connection', function (socket) {
     socket.on('actualizarMonedas', (datos) => {
         if (datos) {
             coinsPorRoom[datos.room - 1] = datos.moneda;
+
         }
     })
 
 
     socket.on('disconnect', function () {
         id = socket.id
-        console.log("Usuario desconectado")
+        coinsPorRoom.forEach((element, index) => {
+            element.forEach((elemento) => {
+                if(elemento.idS == id){
+                    element.splice(index,1)
+                    return;
+                }
+            });
+        });
+        console.log("Usuario desconectado"+id)
     });
 });
 

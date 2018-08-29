@@ -9,15 +9,11 @@ var control2 = false;
 var co;
 var datos = null;
 var monedas1 = new Array(0);
-
-var alto = 500, ancho = 950;
+var puntaje;
+var alto = 350, ancho = 800;
 
 function setup() {
-    // en un setInterval hacer que se creen las monedas cada cierta cantidad de tiempo
-    co = new moneda(random(0, ancho), random(0, alto), int(random(-100, 100)), 0,socket.id, nick);
-    monedas1.push(co);
-        
-    jugador = new Jugador(nick, random(0, ancho), random(0, alto))
+    jugador = new Jugador(nick, random(0, ancho), random(0, alto),0)
     usuario = { nick: jugador.nick, x: jugador.x, y: jugador.y }
     socket.emit('datos', usuario);
     socket.on('heartBeat', (datos) => {
@@ -41,8 +37,12 @@ function draw() {
                 rectMode(CENTER)
                 fill(234, 3, 3);
                 rect(jugadores[index].x, jugadores[index].y, 25, 25)
+                
             }
+            puntaje += "Jugador: "+ jugadores[index].nick +", puntaje: " +jugadores[index].puntaje +"<br>"
+            document.getElementById('puntaje').innerHTML = puntaje
         }
+        puntaje = ""
         var datosJugador = {
             id: socket.id,
             room: jugador.room,
@@ -53,7 +53,7 @@ function draw() {
         socket.emit('update', datosJugador);
 
 
-        procesar(datos)        
+        procesar(datos)
         monedas1.forEach(moneda => {
             moneda.show();
             if (moneda.idS == socket.id) {
@@ -67,10 +67,21 @@ function draw() {
                     id: moneda.id
                 }
                 socket.emit('updateCoin', datos)
-                
             }
-            //moneda.colision(jugador)
-            
+            if (moneda.colision(jugador)) {
+                
+
+                if(moneda.idS != socket.id){
+                    console.log("reducir puntos")
+                    jugador.puntaje -= moneda.valor
+                }
+                else{
+                    jugador.puntaje += moneda.valor
+                }
+
+                //socket.emit('actualizarMonedas', { room: jugador.room, otro: (moneda.nick != jugador.nick), moneda: monedas1 })
+            }
+
         });
 
     }
@@ -82,20 +93,24 @@ socket.on('connectToRoom', function (data) {
     colorFondo = 255;
     if (data) {
         socket.on('heartBeatCoin', (monedas) => {
-            datos = monedas            
+            datos = monedas
         })
         control2 = true;
     }
 });
 
 socket.on('recibirRoom', (dato) => {
+    // en un setInterval hacer que se creen las monedas cada cierta cantidad de tiempo
+    co = new moneda(random(0, ancho), random(0, alto), int(random(0, 100)), 0, socket.id, nick, 0);
+    monedas1.push(co);
     jugador.room = dato.room;
     monedas1[0].id = dato.id
+    monedas1[0].room = jugador.room
     coin = { room: dato.room, x: monedas1[0].x, y: monedas1[0].y, valor: monedas1[0].valor, idS: socket.id, id: dato.id, nick: nick }
     socket.emit('datosCoin', coin)
 })
-
-function procesar(datos){
+ 
+function procesar(datos) {
     if (datos !== null) {
         var existe = false
         datos.forEach(elemento => {
@@ -111,11 +126,21 @@ function procesar(datos){
                     }
                 });
                 if (!existe) {
-                    var co = new moneda(elemento.x, elemento.y, elemento.valor, elemento.id, elemento.idS, elemento.nick)
+                    var co = new moneda(elemento.x, elemento.y, elemento.valor, elemento.id, elemento.idS, elemento.nick, jugador.room)
                     monedas1.push(co);
-                    socket.emit('actualizarMonedas',{room:jugador.room, moneda:monedas1})                    
+                    socket.emit('actualizarMonedas', { room: jugador.room, moneda: monedas1 })
                 }
             }
         });
+    }
+}
+
+
+document.onkeydown = function () {
+    if (window.event && window.event.keyCode == 116) {
+        window.event.keyCode = 505;
+    }
+    if (window.event && window.event.keyCode == 505) {
+        return false;
     }
 }
