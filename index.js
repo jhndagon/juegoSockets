@@ -4,12 +4,11 @@ var server = require('http').Server(app)
 var io = require('socket.io')(server)
 
 var roomno = 1;
-var desconexion = 0;
+var conexiones = 0;
 app.use(express.static('public'))
 
 var usuarios = []
 var usuariosPorRoom = []
-
 var coinsPorRoom = new Array(new Array(0))
 
 function Player(id, nick, x, y, puntaje) {
@@ -44,7 +43,7 @@ setInterval(() => {
 
 io.on('connection', function (socket) {
     console.log('usuario conectado');
-    
+    conexiones +=1;
     //Increase roomno 2 clients are present in a room.
     if (io.nsps['/'].adapter.rooms["room-" + roomno]
         && io.nsps['/'].adapter.rooms["room-" + roomno].length > 1) {
@@ -60,7 +59,6 @@ io.on('connection', function (socket) {
         roomno += 1;
         coinsPorRoom.push(new Array(0))
         coinsPorRoom[roomno - 1].push()
-        console.log(roomno)
     }
 
 
@@ -128,7 +126,7 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function () {
         var id = socket.id
         //desconexion += 1;
-        coinsPorRoom.forEach((element, index) => {
+        /*coinsPorRoom.forEach((element, index) => {
             element.forEach((elemento) => {
                 if(elemento.idS == id){
                     element.splice(index,1)
@@ -136,12 +134,8 @@ io.on('connection', function (socket) {
                 }
             });
         });
-        //if(desconexion %2==0){
-        //    ++roomno;
-        //}
         if(typeof usuarios == undefined && usuarios.length == 1){
             usuarios = [];
-            desconexion = 0;
         }
         else{
             usuariosPorRoom.forEach(usuarios => {
@@ -154,14 +148,22 @@ io.on('connection', function (socket) {
                 });
     
             });
+        }*/
+        conexiones -= 1;
+        if(conexiones == 0){
+            usuarios=[]
+            usuariosPorRoom = []
+            coinsPorRoom =[]
+            coinsPorRoom = new Array(new Array(0))
+            roomno = 1;
         }
-        
-        console.log("Usuario desconectado"+id)
+        console.log("Usuario desconectado "+id)
     });
 });
 
 
 
-server.listen(process.env.PORT || 3001, function () {
+server.listen(process.env.PORT || 3000, function () {
     console.log('Escuchando en localhost:3000')
+
 })
