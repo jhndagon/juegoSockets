@@ -14,7 +14,7 @@ var puntaje;
 var alto = 350, ancho = 800;
 
 function setup() {
-    jugador = new Jugador(nick, random(0, ancho), random(0, alto),0)
+    jugador = new Jugador(nick, random(0, ancho), random(0, alto), 0)
     usuario = { nick: jugador.nick, x: jugador.x, y: jugador.y }
     socket.emit('datos', usuario);
     socket.on('heartBeat', (datos) => {
@@ -31,16 +31,16 @@ function draw() {
     background(colorFondo);
     jugador.move();
     jugador.show();
- 
+
     if (control1 && control2) {
 
         for (let index = 0; index < jugadores.length; index++) {
             if (jugadores[index].id !== socket.id) {
                 rectMode(CENTER)
                 fill(234, 3, 3);
-                rect(jugadores[index].x, jugadores[index].y, 25, 25)                
+                rect(jugadores[index].x, jugadores[index].y, 25, 25)
             }
-            puntaje += "Jugador: "+ jugadores[index].nick +", puntaje: " +jugadores[index].puntaje +"<br>"
+            puntaje += "Jugador: " + jugadores[index].nick + ", puntaje: " + jugadores[index].puntaje + "<br>"
             document.getElementById('puntaje').innerHTML = puntaje
         }
         puntaje = ""
@@ -57,6 +57,19 @@ function draw() {
         procesar(datos)
         monedas1.forEach(moneda => {
             moneda.show();
+            if (moneda.colision(jugador)) {
+                if (moneda.color == 0 && jugador.puntaje > 0) {
+                    jugador.puntaje = 0;
+                    moneda.speedx += 0.6
+                    moneda.speedy += 0.6
+                }
+                else if (moneda.idS != socket.id) {
+                    jugador.puntaje -= moneda.valor
+                }
+                else {
+                    jugador.puntaje += moneda.valor
+                }
+            }
             if (moneda.idS == socket.id) {
                 moneda.move()
                 var datos = {
@@ -69,25 +82,17 @@ function draw() {
                 }
                 socket.emit('updateCoin', datos)
             }
-            if (moneda.colision(jugador)) {
-                if(moneda.idS != socket.id){
-                    console.log("reducir puntos")
-                    jugador.puntaje -= moneda.valor
-                }
-                else{
-                    jugador.puntaje += moneda.valor
-                }
-            }
+
         });
     }
 
-    if(jugador.puntaje > 3000){
+    if (jugador.puntaje > 1000) {
         noLoop()
-        socket.emit('ganador', {gano: "Ganador: " +jugador.nick, room: jugador.room})
+        socket.emit('ganador', { gano: "Ganador: " + jugador.nick, room: jugador.room })
     }
-    else if(jugador.puntaje < -3000){
+    else if (jugador.puntaje < -1000) {
         noLoop()
-        socket.emit('ganador', {gano: "Perdedor: "+jugador.nick, room: jugador.room})
+        socket.emit('ganador', { gano: "Perdedor: " + jugador.nick, room: jugador.room })
     }
 }
 
@@ -103,14 +108,42 @@ socket.on('connectToRoom', function (data) {
     }
 });
 
-socket.on('recibirRoom', (dato) => {    
+socket.on('recibirRoom', (dato) => {
     jugador.room = dato.room;
-    co = new moneda(random(0, ancho), random(0, alto), int(random(0, 100)), 0, socket.id, nick, 0, 250);
+    co = new moneda(random(0, ancho), random(0, alto), int(random(50, 100)), 0, socket.id, nick, 0, 250);
     monedas1.push(co);
     monedas1[0].id = dato.id
     monedas1[0].room = jugador.room
-    coin = { room: dato.room, x: monedas1[0].x, y: monedas1[0].y, valor: monedas1[0].valor, idS: socket.id, id: dato.id, nick: nick }
+    coin = {
+        room: dato.room,
+        x: monedas1[0].x,
+        y: monedas1[0].y,
+        valor: monedas1[0].valor,
+        idS: socket.id,
+        id: dato.id,
+        nick: nick,
+        color: monedas1[0].color
+    }
     socket.emit('datosCoin', coin)
+
+    if (monedas1.length < 3) {
+        //moneda verde
+        co = new moneda(random(0, ancho), random(0, alto), int(random(50, 100)), 0, socket.id, nick, 0, 0);
+        monedas1.push(co);
+        monedas1[monedas1.length - 1].id = dato.id
+        monedas1[monedas1.length - 1].room = jugador.room
+        coin = {
+            room: dato.room,
+            x: monedas1[monedas1.length - 1].x,
+            y: monedas1[monedas1.length - 1].y,
+            valor: monedas1[monedas1.length - 1].valor,
+            idS: socket.id,
+            id: dato.id,
+            nick: nick,
+            color: monedas1[monedas1.length - 1].color
+        }
+        socket.emit('datosCoin', coin)
+    }
 })
 
 socket.on('gane', (gano) => {
@@ -118,7 +151,7 @@ socket.on('gane', (gano) => {
     noLoop()
     document.getElementById('cnv').innerHTML = gano
 })
- 
+
 function procesar(datos) {
     if (datos !== null) {
         var existe = false
@@ -135,7 +168,7 @@ function procesar(datos) {
                     }
                 });
                 if (!existe) {
-                    var co = new moneda(elemento.x, elemento.y, elemento.valor, elemento.id, elemento.idS, elemento.nick, jugador.room,250)
+                    var co = new moneda(elemento.x, elemento.y, elemento.valor, elemento.id, elemento.idS, elemento.nick, jugador.room, elemento.color)
                     monedas1.push(co);
                     socket.emit('actualizarMonedas', { room: jugador.room, moneda: monedas1 })
                 }

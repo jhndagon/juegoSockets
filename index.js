@@ -18,7 +18,7 @@ function Player(id, nick, x, y, puntaje) {
     this.y = y;
     this.puntaje = puntaje
 }
-function Coin(room, id, idS, x, y, valor, nick) {
+function Coin(room, id, idS, x, y, valor, nick, color) {
     this.room = room;
     this.idS = idS;
     this.id = id;
@@ -26,18 +26,23 @@ function Coin(room, id, idS, x, y, valor, nick) {
     this.y = y;
     this.valor = valor;
     this.nick = nick;
+    this.color = color;
 }
 //Envia información a las rooms de las monedas
 setInterval(() => {
     coinsPorRoom.forEach((coin, index) => {
-        io.sockets.in("room-" + (index + 1)).emit("heartBeatCoin", coin)
+        if(conexiones!=0){
+            io.sockets.in("room-" + (index + 1)).emit("heartBeatCoin", coin)
+        }
     });
 }, 33);
 
 //enviar informacion a todas las rooms de la informacion de los jugadores
 setInterval(() => {
     usuariosPorRoom.forEach((jugadores, index) => {
-        io.sockets.in("room-" + (index + 1)).emit("heartBeat", jugadores)
+        if(conexiones != 0){
+            io.sockets.in("room-" + (index + 1)).emit("heartBeat", jugadores)
+        }
     });
 }, 33);
 
@@ -89,7 +94,7 @@ io.on('connection', function (socket) {
     //informacion de las monedas
     socket.on('datosCoin', (datos) => {
         if (typeof coinsPorRoom[datos.room - 1] === 'undefined' || coinsPorRoom[datos.room - 1].length < 10) {
-            co = new Coin(datos.room, datos.id, datos.idS, datos.x, datos.y, datos.valor, datos.nick);
+            co = new Coin(datos.room, datos.id, datos.idS, datos.x, datos.y, datos.valor, datos.nick, datos.color);
             if(coinsPorRoom[datos.room - 1]  && coinsPorRoom[datos.room - 1].length < 3){
                 coinsPorRoom[datos.room - 1].push(co)
             }            
@@ -123,31 +128,6 @@ io.on('connection', function (socket) {
     })
 
     socket.on('disconnect', function () {
-        var id = socket.id
-        //desconexion += 1;
-        /*coinsPorRoom.forEach((element, index) => {
-            element.forEach((elemento) => {
-                if(elemento.idS == id){
-                    element.splice(index,1)
-                    return;
-                }
-            });
-        });
-        if(typeof usuarios == undefined && usuarios.length == 1){
-            usuarios = [];
-        }
-        else{
-            usuariosPorRoom.forEach(usuarios => {
-                usuarios.forEach((usuario, index) => {
-                    if(usuario.id == id){
-                        usuarios.splice(index,1)
-                        
-                        return;
-                    }
-                });
-    
-            });
-        }*/
         conexiones -= 1;
         if(conexiones == 0){
             usuarios=[]
@@ -156,11 +136,9 @@ io.on('connection', function (socket) {
             coinsPorRoom = new Array(new Array(0))
             roomno = 1;
         }
-        console.log("Usuario desconectado "+id)
+        console.log("Usuario desconectado "+socket.id)
     });
 });
-
-
 
 server.listen(process.env.PORT || 3000, function () {
     console.log('Escuchando en localhost:3000')
