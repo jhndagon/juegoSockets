@@ -118,7 +118,8 @@ io.on('connection', function (socket) {
     socket.on('ganador', (gano) => {
         //agregar room 
         //socket.emit('gane', gano.gano.nick)
-        io.sockets.in("room-" + gano.room).emit('gane', gano.gano.nick);
+        console.log(gano)
+        io.sockets.in("room-" + gano.room).emit('gane', gano.gano);
     })
 
     socket.on('disconnect', function () {

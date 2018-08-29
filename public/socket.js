@@ -88,7 +88,11 @@ function draw() {
 
     if(jugador.puntaje > 3000){
         noLoop()
-        socket.emit('ganador', {gano: jugador.nick, room: jugador.room})
+        socket.emit('ganador', {gano: "Ganador: " +jugador.nick, room: jugador.room})
+    }
+    if(jugador.puntaje < -3000){
+        noLoop()
+        socket.emit('ganador', {gano: "Perdedor: "+jugador.nick, room: jugador.room})
     }
 }
 
@@ -116,8 +120,9 @@ socket.on('recibirRoom', (dato) => {
 })
 
 socket.on('gane', (gano) => {
+    console.log(gano)
     noLoop()
-    document.getElementById('cnv').innerHTML = "Ganador: "+ gano
+    document.getElementById('cnv').innerHTML = gano
 })
  
 function procesar(datos) {
