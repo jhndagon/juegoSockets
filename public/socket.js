@@ -3,7 +3,7 @@ var socket = io()
 
 var nick = window.location.href.split("?usuario=")[1]
 var jugador;
-var colorFondo = 0;
+var colorFondo = 255;
 var jugadores;
 var control1 = false;
 var control2 = false;
@@ -60,8 +60,8 @@ function draw() {
             if (moneda.colision(jugador)) {
                 if (moneda.color == 0 && jugador.puntaje > 0) {
                     jugador.puntaje = 0;
-                    moneda.speedx += 0.6
-                    moneda.speedy += 0.6
+                    moneda.speedx += 1
+                    moneda.speedy += 1
                 }
                 else if (moneda.idS != socket.id) {
                     jugador.puntaje -= moneda.valor
@@ -147,10 +147,15 @@ socket.on('recibirRoom', (dato) => {
 })
 
 socket.on('gane', (gano) => {
-    console.log(gano)
     noLoop()
     document.getElementById('cnv').innerHTML = gano
+    document.getElementById('boton').innerHTML ='<input type="button" id="jugar" name="Volver a jugar" class="btn btn-primary" onclick="inicio()" value="Jugar" />'
+    
 })
+
+function inicio(){
+    location.href ="index.html";
+}
 
 function procesar(datos) {
     if (datos !== null) {
@@ -177,3 +182,10 @@ function procesar(datos) {
     }
 }
 
+function disableF5(e) { 
+	if ((e.which || e.keyCode) == 116) {
+  	e.preventDefault();
+  }
+};
+
+$(document).on("keydown", disableF5);

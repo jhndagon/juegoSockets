@@ -59,13 +59,10 @@ io.on('connection', function (socket) {
     }
     socket.join("room-" + roomno); 
 
-
     if (io.nsps['/'].adapter.rooms["room-" + roomno].length == 2) {
         //llenar vector nposiciones
-        io.sockets.in("room-" + roomno).emit('connectToRoom', roomno);
-
+        io.sockets.in("room-" + roomno).emit('connectToRoom', roomno);        
     }
-
 
     //informacion del jugador
     socket.on('datos', (datos) => {
@@ -123,7 +120,6 @@ io.on('connection', function (socket) {
     })
 
     socket.on('ganador', (gano) => {
-        console.log(gano)
         io.sockets.in("room-" + gano.room).emit('gane', gano.gano);
     })
 
@@ -136,11 +132,13 @@ io.on('connection', function (socket) {
             coinsPorRoom = new Array(new Array(0))
             roomno = 1;
         }
+
+        socket.disconnect();
         console.log("Usuario desconectado "+socket.id)
     });
 });
 
-server.listen(process.env.PORT || 3000, function () {
+server.listen(process.env.PORT || 3001, function () {
     console.log('Escuchando en localhost:3000')
 
 })
