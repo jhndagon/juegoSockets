@@ -4,6 +4,7 @@ var server = require('http').Server(app)
 var io = require('socket.io')(server)
 
 var roomno = 1;
+var desconexion = 0;
 app.use(express.static('public'))
 
 var usuarios = []
@@ -32,7 +33,7 @@ setInterval(() => {
     coinsPorRoom.forEach((coin, index) => {
         io.sockets.in("room-" + (index + 1)).emit("heartBeatCoin", coin)
     });
-}, 17);
+}, 33);
 
 //enviar informacion a todas las rooms de la informacion de los jugadores
 setInterval(() => {
@@ -43,21 +44,25 @@ setInterval(() => {
 
 io.on('connection', function (socket) {
     console.log('usuario conectado');
-
+    
     //Increase roomno 2 clients are present in a room.
     if (io.nsps['/'].adapter.rooms["room-" + roomno]
         && io.nsps['/'].adapter.rooms["room-" + roomno].length > 1) {
-        ++roomno;
-        coinsPorRoom.push(new Array(0))
-        coinsPorRoom[roomno - 1].push()
-        console.log(roomno)
+        
+
     }
-    socket.join("room-" + roomno);
+    socket.join("room-" + roomno); 
+
 
     if (io.nsps['/'].adapter.rooms["room-" + roomno].length == 2) {
         //llenar vector nposiciones
         io.sockets.in("room-" + roomno).emit('connectToRoom', roomno);
+        roomno += 1;
+        coinsPorRoom.push(new Array(0))
+        coinsPorRoom[roomno - 1].push()
+        console.log(roomno)
     }
+
 
     //informacion del jugador
     socket.on('datos', (datos) => {
@@ -87,7 +92,7 @@ io.on('connection', function (socket) {
     socket.on('datosCoin', (datos) => {
         if (typeof coinsPorRoom[datos.room - 1] === 'undefined' || coinsPorRoom[datos.room - 1].length < 10) {
             co = new Coin(datos.room, datos.id, datos.idS, datos.x, datos.y, datos.valor, datos.nick);
-            if(coinsPorRoom[datos.room - 1].length < 3){
+            if(coinsPorRoom[datos.room - 1]  && coinsPorRoom[datos.room - 1].length < 3){
                 coinsPorRoom[datos.room - 1].push(co)
             }            
         }
@@ -96,7 +101,7 @@ io.on('connection', function (socket) {
     socket.on('updateCoin', (datos) => {
         if (datos != null) {
             coinsRoom = coinsPorRoom[datos.room - 1]
-            if (coinsPorRoom !== undefined && datos.room) {
+            if (coinsPorRoom !== undefined && datos.room && coinsRoom) {
                 coinsRoom.forEach(element => {
                     if (element.idS == socket.id && element.id == datos.id) {
                         element.x = datos.x
@@ -116,14 +121,13 @@ io.on('connection', function (socket) {
     })
 
     socket.on('ganador', (gano) => {
-        //agregar room 
-        //socket.emit('gane', gano.gano.nick)
         console.log(gano)
         io.sockets.in("room-" + gano.room).emit('gane', gano.gano);
     })
 
     socket.on('disconnect', function () {
-        id = socket.id
+        var id = socket.id
+        //desconexion += 1;
         coinsPorRoom.forEach((element, index) => {
             element.forEach((elemento) => {
                 if(elemento.idS == id){
@@ -132,6 +136,26 @@ io.on('connection', function (socket) {
                 }
             });
         });
+        //if(desconexion %2==0){
+        //    ++roomno;
+        //}
+        if(typeof usuarios == undefined && usuarios.length == 1){
+            usuarios = [];
+            desconexion = 0;
+        }
+        else{
+            usuariosPorRoom.forEach(usuarios => {
+                usuarios.forEach((usuario, index) => {
+                    if(usuario.id == id){
+                        usuarios.splice(index,1)
+                        
+                        return;
+                    }
+                });
+    
+            });
+        }
+        
         console.log("Usuario desconectado"+id)
     });
 });

@@ -1,4 +1,5 @@
-var socket = io()
+var socket = io({transports: ['websocket'], upgrade: false, 'force new connection': true})
+
 
 var nick = window.location.href.split("?usuario=")[1]
 var jugador;
@@ -18,7 +19,10 @@ function setup() {
     socket.emit('datos', usuario);
     socket.on('heartBeat', (datos) => {
         jugadores = datos;
-        control1 = true
+        if(jugadores.length == 2){
+            control1 = true
+        }
+
     })
 
     var cnv = createCanvas(ancho, alto);
@@ -28,11 +32,9 @@ function setup() {
 
 function draw() {
     background(colorFondo);
-    jugador.move();
-    jugador.show();
-
-
     if (control1 && control2) {
+        jugador.move();
+        jugador.show();
         for (let index = 0; index < jugadores.length; index++) {
             if (jugadores[index].id !== socket.id) {
                 rectMode(CENTER)
@@ -108,11 +110,10 @@ socket.on('connectToRoom', function (data) {
     }
 });
 
-socket.on('recibirRoom', (dato) => {
-    // en un setInterval hacer que se creen las monedas cada cierta cantidad de tiempo
+socket.on('recibirRoom', (dato) => {    
+    jugador.room = dato.room;
     co = new moneda(random(0, ancho), random(0, alto), int(random(0, 100)), 0, socket.id, nick, 0, 250);
     monedas1.push(co);
-    jugador.room = dato.room;
     monedas1[0].id = dato.id
     monedas1[0].room = jugador.room
     coin = { room: dato.room, x: monedas1[0].x, y: monedas1[0].y, valor: monedas1[0].valor, idS: socket.id, id: dato.id, nick: nick }
@@ -141,7 +142,7 @@ function procesar(datos) {
                     }
                 });
                 if (!existe) {
-                    var co = new moneda(elemento.x, elemento.y, elemento.valor, elemento.id, elemento.idS, elemento.nick, jugador.room)
+                    var co = new moneda(elemento.x, elemento.y, elemento.valor, elemento.id, elemento.idS, elemento.nick, jugador.room,250)
                     monedas1.push(co);
                     socket.emit('actualizarMonedas', { room: jugador.room, moneda: monedas1 })
                 }
