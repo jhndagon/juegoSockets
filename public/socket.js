@@ -1,4 +1,4 @@
-var socket = io({transports: ['websocket'], upgrade: false, 'force new connection': true})
+var socket = io()
 
 
 var nick = window.location.href.split("?usuario=")[1]

@@ -47,7 +47,9 @@ io.on('connection', function (socket) {
     //Increase roomno 2 clients are present in a room.
     if (io.nsps['/'].adapter.rooms["room-" + roomno]
         && io.nsps['/'].adapter.rooms["room-" + roomno].length > 1) {
-        
+            ++roomno;
+            coinsPorRoom.push(new Array(0))
+            coinsPorRoom[roomno - 1].push()
 
     }
     socket.join("room-" + roomno); 
@@ -56,9 +58,7 @@ io.on('connection', function (socket) {
     if (io.nsps['/'].adapter.rooms["room-" + roomno].length == 2) {
         //llenar vector nposiciones
         io.sockets.in("room-" + roomno).emit('connectToRoom', roomno);
-        roomno += 1;
-        coinsPorRoom.push(new Array(0))
-        coinsPorRoom[roomno - 1].push()
+
     }
 
 
