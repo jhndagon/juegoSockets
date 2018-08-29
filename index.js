@@ -114,7 +114,6 @@ io.on('connection', function (socket) {
     socket.on('actualizarMonedas', (datos) => {
         if (datos) {
             coinsPorRoom[datos.room - 1] = datos.moneda;
-
         }
     })
 

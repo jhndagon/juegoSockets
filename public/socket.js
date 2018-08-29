@@ -19,10 +19,7 @@ function setup() {
     socket.emit('datos', usuario);
     socket.on('heartBeat', (datos) => {
         jugadores = datos;
-        if(jugadores.length == 2){
-            control1 = true
-        }
-
+        control1 = true
     })
 
     var cnv = createCanvas(ancho, alto);
@@ -32,9 +29,11 @@ function setup() {
 
 function draw() {
     background(colorFondo);
+    jugador.move();
+    jugador.show();
+ 
     if (control1 && control2) {
-        jugador.move();
-        jugador.show();
+
         for (let index = 0; index < jugadores.length; index++) {
             if (jugadores[index].id !== socket.id) {
                 rectMode(CENTER)
@@ -71,8 +70,6 @@ function draw() {
                 socket.emit('updateCoin', datos)
             }
             if (moneda.colision(jugador)) {
-                
-
                 if(moneda.idS != socket.id){
                     console.log("reducir puntos")
                     jugador.puntaje -= moneda.valor
@@ -80,19 +77,15 @@ function draw() {
                 else{
                     jugador.puntaje += moneda.valor
                 }
-
-                //socket.emit('actualizarMonedas', { room: jugador.room, otro: (moneda.nick != jugador.nick), moneda: monedas1 })
             }
-
         });
-
     }
 
     if(jugador.puntaje > 3000){
         noLoop()
         socket.emit('ganador', {gano: "Ganador: " +jugador.nick, room: jugador.room})
     }
-    if(jugador.puntaje < -3000){
+    else if(jugador.puntaje < -3000){
         noLoop()
         socket.emit('ganador', {gano: "Perdedor: "+jugador.nick, room: jugador.room})
     }
