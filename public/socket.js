@@ -1,4 +1,6 @@
-var socket = io()
+var socket = io({
+    reconnection: false
+})
 
 
 var nick = window.location.href.split("?usuario=")[1]
@@ -148,6 +150,7 @@ socket.on('recibirRoom', (dato) => {
 
 socket.on('gane', (gano) => {
     noLoop()
+    socket.disconnect()
     document.getElementById('cnv').innerHTML = gano
     document.getElementById('boton').innerHTML ='<input type="button" id="jugar" name="Volver a jugar" class="btn btn-primary" onclick="inicio()" value="Jugar" />'
     
